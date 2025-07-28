@@ -26,6 +26,7 @@ jobs:
           - macos-stable
         features:
           - default
+          - no-default
           - all
         include:
           - build: linux-stable
@@ -39,6 +40,8 @@ jobs:
             target: aarch64-apple-darwin
           - features: default
             feature-flag: ""
+          - features: no-default
+            feature-flag: --no-default-features
           - features: all
             feature-flag: --all-features
     runs-on: ${{ matrix.os }}
@@ -52,3 +55,34 @@ jobs:
           target: ${{ matrix.target }}
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --target ${{ matrix.target }} ${{ matrix.feature-flag }}
+  msrv:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        features:
+          - default
+          - no-default
+          - all
+        include:
+          - features: default
+            feature-flag: ""
+          - features: no-default
+            feature-flag: --no-default-features
+          - features: all
+            feature-flag: --all-features
+    env:
+      CARGO_TERM_COLOR: always
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-msrv
+      - run: cargo msrv --version
+      - run: cargo msrv verify
+      - if: ${{ failure() }}
+        run: cargo msrv find -- cargo test ${{ matrix.feature-flag }} --ignore-rust-version

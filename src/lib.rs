@@ -12,7 +12,7 @@
 //! assert_eq!(v.unwrap_err(), OneBasedError::ZeroIndex);
 //! ```
 
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 use core::{
     fmt::Display,
@@ -130,7 +130,8 @@ impl Display for OneBasedError {
     }
 }
 
-impl core::error::Error for OneBasedError {}
+#[cfg(feature = "std")]
+impl std::error::Error for OneBasedError {}
 
 #[cfg(test)]
 mod tests {
