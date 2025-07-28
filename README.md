@@ -1,5 +1,7 @@
 # one-based
 
+[![CI](https://github.com/xkikeg/one-based/actions/workflows/ci.yml/badge.svg)](https://github.com/xkikeg/one-based/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/xkikeg/one-based/graph/badge.svg?token=QOAN4RFSA6)](https://codecov.io/gh/xkikeg/one-based)
+
 This crate provides simple unsigned wrappers to handle 1-based index.
 
 ```rust
