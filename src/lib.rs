@@ -12,7 +12,9 @@
 //! assert_eq!(v.unwrap_err(), OneBasedError::ZeroIndex);
 //! ```
 
-use std::{
+#![no_std]
+
+use core::{
     fmt::Display,
     num::{
         NonZeroU128, NonZeroU16, NonZeroU32, NonZeroU64, NonZeroU8, NonZeroUsize, ParseIntError,
@@ -47,7 +49,7 @@ macro_rules! define_one_based {
         pub struct $name($nonzerotype);
 
         impl Display for $name {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 self.as_one_based().fmt(f)
             }
         }
@@ -118,7 +120,7 @@ pub enum OneBasedError {
 }
 
 impl Display for OneBasedError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             OneBasedError::ZeroIndex => f.write_str("0 passed as 1-based index"),
             OneBasedError::OverflowIndex => {
@@ -128,11 +130,13 @@ impl Display for OneBasedError {
     }
 }
 
-impl std::error::Error for OneBasedError {}
+impl core::error::Error for OneBasedError {}
 
 #[cfg(test)]
 mod tests {
-    use std::num::IntErrorKind;
+    use core::num::IntErrorKind;
+
+    use arrayvec::ArrayString;
 
     use super::*;
 
@@ -176,9 +180,13 @@ mod tests {
 
     #[test]
     fn from_str_and_to_string() {
+        use core::fmt::Write as _;
+
         let v: OneBasedU16 = "12345".parse().unwrap();
         assert_eq!(v.as_zero_based(), 12344u16);
-        assert_eq!(&v.to_string(), "12345");
+        let mut buf: ArrayString<10> = ArrayString::new();
+        write!(&mut buf, "{}", v).unwrap();
+        assert_eq!(&buf, "12345");
     }
 
     #[test]

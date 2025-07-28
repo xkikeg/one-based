@@ -1,14 +1,18 @@
 [package]
 name = "one-based"
 authors = ["xkikeg"]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2018"
 rust-version = "1.79.0"
 license = "Apache-2.0"
 description = "library for 1-based unsigned integers."
+keywords = ["no-std", "no_std", "utility"]
 
 [dependencies]
 serde = { optional = true, version = "1.0", features = [ "derive" ] }
+
+[dev-dependencies]
+arrayvec = "0.7.6"
 
 [features]
 serde = ["dep:serde"]
