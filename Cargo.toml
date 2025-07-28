@@ -15,4 +15,6 @@ serde = { optional = true, version = "1.0", features = [ "derive" ] }
 arrayvec = "0.7.6"
 
 [features]
+default = ["std"]
 serde = ["dep:serde"]
+std = []
