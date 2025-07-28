@@ -1,0 +1,13 @@
+[package]
+name = "one-based"
+authors = ["xkikeg"]
+version = "0.1.0"
+edition = "2018"
+rust-version = "1.79.0"
+license = "Apache 2.0"
+
+[dependencies]
+serde = { optional = true, version = "1.0", features = [ "derive" ] }
+
+[features]
+serde = ["dep:serde"]
