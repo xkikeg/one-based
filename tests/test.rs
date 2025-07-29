@@ -22,10 +22,17 @@ mod constness {
     const ONE_BASED_ONE_AS_ZERO_BASED: usize = ONE_BASED_ONE.as_zero_based();
     const ZERO_BASED_ONE_AS_ONE_BASED: NonZeroUsize = ZERO_BASED_ONE.as_one_based();
 
+    const UNSAFE_ZERO: usize =
+        unsafe { OneBasedUsize::from_one_based_unchecked(1) }.as_zero_based();
+    const UNSAFE_ONE: NonZeroUsize =
+        unsafe { OneBasedUsize::from_zero_based_unchecked(0) }.as_one_based();
+
     #[test]
     fn verify() {
         assert_eq!(ONE_BASED_ONE_AS_ZERO_BASED, 0);
         assert_eq!(ZERO_BASED_ONE_AS_ONE_BASED.get(), 2);
+        assert_eq!(UNSAFE_ZERO, 0);
+        assert_eq!(UNSAFE_ONE, NonZeroUsize::new(1).unwrap());
     }
 }
 
@@ -46,6 +53,16 @@ mod from_x_based {
                 .unwrap()
                 .as_one_based(),
             NonZeroU16::MAX
+        );
+
+        assert_eq!(
+            unsafe { OneBasedU32::from_one_based_unchecked(2) }.as_zero_based(),
+            1
+        );
+
+        assert_eq!(
+            unsafe { OneBasedU32::from_zero_based_unchecked(2) }.as_zero_based(),
+            2
         );
     }
 

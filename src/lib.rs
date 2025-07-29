@@ -92,6 +92,16 @@ macro_rules! define_one_based {
                 }
             }
 
+            /// Creates `$name` from 1-based index value without check.
+            ///
+            /// # Safety
+            ///
+            /// Input must be greater than zero.
+            #[inline]
+            pub const unsafe fn from_one_based_unchecked(v: $itype) -> Self {
+                $name(<$nonzerotype>::new_unchecked(v))
+            }
+
             /// Creates `$name` from 1-based index value as [`$nonzerotype`].
             /// This will always succeed.
             #[inline]
@@ -109,6 +119,23 @@ macro_rules! define_one_based {
                 }
                 // this won't overflow, and cannot be zero (note all $itype is unsigned).
                 Ok($name(unsafe { <$nonzerotype>::new_unchecked(v + 1) }))
+            }
+
+            /// Creates `$name` from 0-based index value without check.
+            ///
+            /// # Safety
+            #[doc = concat!(r" This function results in undefined behavior when `v == ", stringify!($itype), r"::MAX`.")]
+            /// ```no_run
+            #[doc = concat!(r" # use one_based::", stringify!($name), r";")]
+            /// // This should cause undefined behavior
+            /// unsafe {
+            #[doc = concat!(r"     ", stringify!($name), "::from_zero_based_unchecked(", stringify!($itype), r"::MAX);")]
+            /// }
+            /// ```
+            #[inline]
+            pub const unsafe fn from_zero_based_unchecked(v: $itype) -> Self {
+                // this won't overflow, and cannot be zero (note all $itype is unsigned).
+                $name(unsafe { <$nonzerotype>::new_unchecked(v + 1) })
             }
 
             /// Returns regular 0-based index.
