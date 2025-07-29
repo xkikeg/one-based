@@ -6,6 +6,29 @@ use core::str::FromStr;
 use arrayvec::ArrayString;
 use one_based::*;
 
+mod constness {
+    use super::*;
+
+    const fn unwrap_const(v: Result<OneBasedUsize, OneBasedError>) -> OneBasedUsize {
+        match v {
+            Ok(v) => v,
+            Err(_) => panic!("OneBased initialization failed"),
+        }
+    }
+
+    const ONE_BASED_ONE: OneBasedUsize = unwrap_const(OneBasedUsize::from_one_based(1));
+    const ZERO_BASED_ONE: OneBasedUsize = unwrap_const(OneBasedUsize::from_zero_based(1));
+
+    const ONE_BASED_ONE_AS_ZERO_BASED: usize = ONE_BASED_ONE.as_zero_based();
+    const ZERO_BASED_ONE_AS_ONE_BASED: NonZeroUsize = ZERO_BASED_ONE.as_one_based();
+
+    #[test]
+    fn verify() {
+        assert_eq!(ONE_BASED_ONE_AS_ZERO_BASED, 0);
+        assert_eq!(ZERO_BASED_ONE_AS_ONE_BASED.get(), 2);
+    }
+}
+
 mod from_x_based {
     use super::*;
 
