@@ -14,6 +14,10 @@
 
 * Added `From` and `TryFrom` between `OneBasedU*` types.
 
+### Changed
+
+* All functions are now marked as `const`.
+
 ## [0.2.0] - 2025-07-28
 
 ### Changed

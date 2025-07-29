@@ -84,39 +84,40 @@ macro_rules! define_one_based {
         impl $name {
             /// Creates `$name` from 1-based index value.
             /// Returns error if the given index is zero.
-            pub fn from_one_based(v: $itype) -> Result<Self, OneBasedError> {
-                let v = <$nonzerotype>::new(v).ok_or(OneBasedError::ZeroIndex)?;
-                Ok($name(v))
+            #[inline]
+            pub const fn from_one_based(v: $itype) -> Result<Self, OneBasedError> {
+                match <$nonzerotype>::new(v) {
+                    None => return Err(OneBasedError::ZeroIndex),
+                    Some(v) => Ok($name(v)),
+                }
             }
 
             /// Creates `$name` from 1-based index value as [`$nonzerotype`].
             /// This will always succeed.
             #[inline]
-            pub fn from_one_based_nonzero(v: $nonzerotype) -> Self {
+            pub const fn from_one_based_nonzero(v: $nonzerotype) -> Self {
                 Self(v)
             }
 
             /// Creates `$name` from 0-based index value.
             /// Returns error if the given index is MAX value,
             /// as that would case overflow when converted to 1-based.
-            pub fn from_zero_based(v: $itype) -> Result<Self, OneBasedError> {
+            #[inline]
+            pub const fn from_zero_based(v: $itype) -> Result<Self, OneBasedError> {
                 if v == <$nonzerotype>::MAX.get() {
                     return Err(OneBasedError::OverflowIndex);
                 }
-                let v = unsafe {
-                    // this won't overflow, and cannot be zero (note all $itype is unsigned).
-                    <$nonzerotype>::new_unchecked(v + 1)
-                };
-                Ok($name(v))
+                // this won't overflow, and cannot be zero (note all $itype is unsigned).
+                Ok($name(unsafe { <$nonzerotype>::new_unchecked(v + 1) }))
             }
 
             /// Returns regular 0-based index.
-            pub fn as_zero_based(&self) -> $itype {
+            pub const fn as_zero_based(&self) -> $itype {
                 self.0.get() - 1
             }
 
             /// Returns 1-based index.
-            pub fn as_one_based(&self) -> $nonzerotype {
+            pub const fn as_one_based(&self) -> $nonzerotype {
                 self.0
             }
         }
