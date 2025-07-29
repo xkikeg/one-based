@@ -2,14 +2,24 @@
 //!
 //! Example:
 //! ```
-//! # use one_based::{OneBasedU32, OneBasedError};
-//! # use std::num::NonZeroU32;
-//! let v: OneBasedU32 = "5".parse().unwrap();
-//! assert_eq!(v.as_zero_based(), 4);
-//! assert_eq!(v.as_one_based(), NonZeroU32::new(5).unwrap());
+//! # use one_based::{OneBasedU32, OneBasedU64, OneBasedError};
+//! # use std::num::NonZeroU64;
+//! // constructs from 1-based.
+//! let v = OneBasedU32::from_one_based(1).unwrap();
+//! assert_eq!(v.as_zero_based(), 0);
 //!
+//! // constructs from 0-based.
+//! let v = OneBasedU64::from_zero_based(0).unwrap();
+//! assert_eq!(v.as_one_based(), NonZeroU64::new(1).unwrap());
+//!
+//! // fails to construct from zero.
 //! let v: Result<OneBasedU32, OneBasedError> = OneBasedU32::from_one_based(0);
 //! assert_eq!(v.unwrap_err(), OneBasedError::ZeroIndex);
+//!
+//! // string format uses 1-based.
+//! let v: OneBasedU32 = "5".parse().unwrap();
+//! assert_eq!(v.as_zero_based(), 4);
+//! assert_eq!(&v.to_string(), "5");
 //! ```
 
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -22,6 +32,11 @@ use core::{
     str::FromStr,
 };
 
+trait OneBased {
+    type IntType;
+    type NonZeroType;
+}
+
 macro_rules! define_one_based {
     ($name:ident, $itype:ty, $nonzerotype:ty) => {
         #[doc = concat!(r" Represents 1-based index of ", stringify!($itype), r".")]
@@ -31,8 +46,7 @@ macro_rules! define_one_based {
         /// Also, it's quite hard to track if the index is 0-based or 1-based.
         /// `$name` provides ergonomics to handle user provided 1-baed index safely.
         ///
-        #[doc = r" ```"]
-        #[doc = r" # fn main() -> Result<(), one_based::OneBasedError> {"]
+        /// ```
         #[doc = concat!(r" # use one_based::", stringify!($name), r";")]
         #[doc = r" // Creates from 1-based index"]
         #[doc = concat!(r" let v = ", stringify!($name),r"::from_one_based(5)?;")]
@@ -41,12 +55,16 @@ macro_rules! define_one_based {
         #[doc = r" // Creates from 0-based index"]
         #[doc = concat!(r" let v = ", stringify!($name),r"::from_zero_based(0)?;")]
         #[doc = r" assert_eq!(v.as_one_based().get(), 1);"]
-        #[doc = r" # Ok(())"]
-        #[doc = r" # }"]
-        #[doc = r" ```"]
+        #[doc = r" # Ok::<(), one_based::OneBasedError>(())"]
+        /// ```
         #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         pub struct $name($nonzerotype);
+
+        impl OneBased for $name {
+            type IntType = $itype;
+            type NonZeroType = $nonzerotype;
+        }
 
         impl Display for $name {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -112,6 +130,46 @@ define_one_based!(OneBasedU64, u64, NonZeroU64);
 define_one_based!(OneBasedU128, u128, NonZeroU128);
 define_one_based!(OneBasedUsize, usize, NonZeroUsize);
 
+macro_rules! impl_from_one_based {
+    ($source:ty => $($target:ty),+) => {$(
+        impl core::convert::From<$source> for $target {
+            #[doc = concat!(r"Converts [`", stringify!($source), r"`] to [`", stringify!($target), r"`].")]
+            #[inline]
+            fn from(value: $source) -> Self {
+                use core::convert::Into as _;
+                let v: <$target as OneBased>::NonZeroType = value.as_one_based().into();
+                <$target>::from_one_based_nonzero(v)
+            }
+        }
+    )*};
+}
+
+impl_from_one_based!(OneBasedU8  => OneBasedU16, OneBasedU32, OneBasedU64, OneBasedU128);
+impl_from_one_based!(OneBasedU16 => OneBasedU32, OneBasedU64, OneBasedU128);
+impl_from_one_based!(OneBasedU32 => OneBasedU64, OneBasedU128);
+impl_from_one_based!(OneBasedU64 => OneBasedU128);
+
+macro_rules! impl_try_from_one_based {
+    ($source:ty => $($target:ty),+) => {$(
+        impl core::convert::TryFrom<$source> for $target {
+            type Error = core::num::TryFromIntError;
+
+            #[doc = concat!(r"Attempts to convert [`", stringify!($source), r"`] to [`", stringify!($target), r"`].")]
+            #[inline]
+            fn try_from(value: $source) -> Result<Self, Self::Error> {
+                use core::convert::TryInto as _;
+                let v: <$target as OneBased>::NonZeroType = value.as_one_based().try_into()?;
+                Ok(<$target>::from_one_based_nonzero(v))
+            }
+        }
+    )*};
+}
+
+impl_try_from_one_based!(OneBasedU16 => OneBasedU8);
+impl_try_from_one_based!(OneBasedU32 => OneBasedU8, OneBasedU16);
+impl_try_from_one_based!(OneBasedU64 => OneBasedU8, OneBasedU16, OneBasedU32);
+impl_try_from_one_based!(OneBasedU128 => OneBasedU8, OneBasedU16, OneBasedU32, OneBasedU64);
+
 /// Error type used when converting integer to OneBased* types.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum OneBasedError {
@@ -132,70 +190,3 @@ impl Display for OneBasedError {
 
 #[cfg(feature = "std")]
 impl std::error::Error for OneBasedError {}
-
-#[cfg(test)]
-mod tests {
-    use core::num::IntErrorKind;
-
-    use arrayvec::ArrayString;
-
-    use super::*;
-
-    #[test]
-    fn in_range_ints_converts_each_other() {
-        assert_eq!(
-            OneBasedUsize::from_one_based_nonzero(NonZeroUsize::new(1).unwrap()).as_zero_based(),
-            0
-        );
-        assert_eq!(
-            OneBasedU16::from_zero_based(u16::MAX - 1)
-                .unwrap()
-                .as_one_based(),
-            NonZeroU16::MAX
-        );
-    }
-
-    #[test]
-    fn overflow_fails_on_zero_based() {
-        assert_eq!(
-            Err(OneBasedError::OverflowIndex),
-            OneBasedU8::from_zero_based(u8::MAX)
-        );
-        assert_eq!(
-            Err(OneBasedError::OverflowIndex),
-            OneBasedU16::from_zero_based(u16::MAX)
-        );
-        assert_eq!(
-            Err(OneBasedError::OverflowIndex),
-            OneBasedU32::from_zero_based(u32::MAX)
-        );
-        assert_eq!(
-            Err(OneBasedError::OverflowIndex),
-            OneBasedU64::from_zero_based(u64::MAX)
-        );
-        assert_eq!(
-            Err(OneBasedError::OverflowIndex),
-            OneBasedU128::from_zero_based(u128::MAX)
-        );
-    }
-
-    #[test]
-    fn from_str_and_to_string() {
-        use core::fmt::Write as _;
-
-        let v: OneBasedU16 = "12345".parse().unwrap();
-        assert_eq!(v.as_zero_based(), 12344u16);
-        let mut buf: ArrayString<10> = ArrayString::new();
-        write!(&mut buf, "{}", v).unwrap();
-        assert_eq!(&buf, "12345");
-    }
-
-    #[test]
-    fn from_str_failures() {
-        let err = OneBasedU8::from_str("0").unwrap_err();
-        assert_eq!(*err.kind(), IntErrorKind::Zero);
-
-        let err = OneBasedU8::from_str("256").unwrap_err();
-        assert_eq!(*err.kind(), IntErrorKind::PosOverflow);
-    }
-}

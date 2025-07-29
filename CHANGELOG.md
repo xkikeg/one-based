@@ -8,6 +8,12 @@
 
 ### Fixed
 
+## [0.2.1] - 2025-07-29
+
+### Added
+
+* Added `From` and `TryFrom` between `OneBasedU*` types.
+
 ## [0.2.0] - 2025-07-28
 
 ### Changed
