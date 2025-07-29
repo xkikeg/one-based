@@ -12,6 +12,7 @@
 
 ### Added
 
+* Added unsafe `from_*_based_unchecked` variants.
 * Added `From` and `TryFrom` between `OneBasedU*` types.
 
 ### Changed
