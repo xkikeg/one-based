@@ -163,6 +163,8 @@ mod conversion {
         let v: OneBasedU32 = v.try_into().unwrap();
         let v: OneBasedU16 = v.try_into().unwrap();
         let v: OneBasedU8 = v.try_into().unwrap();
+        let v: OneBasedUsize = v.try_into().unwrap();
+        let v: OneBasedU128 = v.try_into().unwrap();
         assert_eq!(v.as_zero_based(), 0);
     }
 

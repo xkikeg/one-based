@@ -8,6 +8,12 @@
 
 ### Fixed
 
+## [0.2.2] - 2025-07-30
+
+### Added
+
+* Added `From` and `TryFrom` from/to `OneBasedUsize` type.
+
 ## [0.2.1] - 2025-07-29
 
 ### Added
