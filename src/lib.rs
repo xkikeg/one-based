@@ -193,10 +193,12 @@ macro_rules! impl_try_from_one_based {
     )*};
 }
 
-impl_try_from_one_based!(OneBasedU16 => OneBasedU8);
-impl_try_from_one_based!(OneBasedU32 => OneBasedU8, OneBasedU16);
-impl_try_from_one_based!(OneBasedU64 => OneBasedU8, OneBasedU16, OneBasedU32);
-impl_try_from_one_based!(OneBasedU128 => OneBasedU8, OneBasedU16, OneBasedU32, OneBasedU64);
+impl_try_from_one_based!(OneBasedU8 => OneBasedUsize);
+impl_try_from_one_based!(OneBasedU16 => OneBasedUsize, OneBasedU8);
+impl_try_from_one_based!(OneBasedU32 => OneBasedUsize, OneBasedU8, OneBasedU16);
+impl_try_from_one_based!(OneBasedU64 => OneBasedUsize, OneBasedU8, OneBasedU16, OneBasedU32);
+impl_try_from_one_based!(OneBasedU128 => OneBasedUsize, OneBasedU8, OneBasedU16, OneBasedU32, OneBasedU64);
+impl_try_from_one_based!(OneBasedUsize => OneBasedU8, OneBasedU16, OneBasedU32, OneBasedU64, OneBasedU128);
 
 /// Error type used when converting integer to OneBased* types.
 #[derive(Debug, Clone, PartialEq, Eq)]
