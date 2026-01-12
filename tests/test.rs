@@ -13,6 +13,7 @@ mod constness {
         OneBasedUsize::from_one_based(1).expect("1 must be a valid one-based usize usize");
     const ZERO_BASED_ONE: OneBasedUsize =
         OneBasedUsize::from_zero_based(1).expect("1 must be a valid zero-based usize index");
+    const ONE_BASED_MAX: OneBasedUsize = OneBasedUsize::from_one_based_nonzero(NonZeroUsize::MAX);
 
     const ONE_BASED_ONE_AS_ZERO_BASED: usize = ONE_BASED_ONE.as_zero_based();
     const ZERO_BASED_ONE_AS_ONE_BASED: NonZeroUsize = ZERO_BASED_ONE.as_one_based();
@@ -24,6 +25,9 @@ mod constness {
 
     #[test]
     fn verify() {
+        assert_eq!(8, OneBasedU8::BITS);
+        assert_eq!(ONE_BASED_ONE, OneBasedUsize::MIN);
+        assert_eq!(ONE_BASED_MAX, OneBasedUsize::MAX);
         assert_eq!(ONE_BASED_ONE_AS_ZERO_BASED, 0);
         assert_eq!(ZERO_BASED_ONE_AS_ONE_BASED.get(), 2);
         assert_eq!(UNSAFE_ZERO, 0);
