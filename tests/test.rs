@@ -9,15 +9,10 @@ use one_based::*;
 mod constness {
     use super::*;
 
-    const fn unwrap_const(v: Result<OneBasedUsize, OneBasedError>) -> OneBasedUsize {
-        match v {
-            Ok(v) => v,
-            Err(_) => panic!("OneBased initialization failed"),
-        }
-    }
-
-    const ONE_BASED_ONE: OneBasedUsize = unwrap_const(OneBasedUsize::from_one_based(1));
-    const ZERO_BASED_ONE: OneBasedUsize = unwrap_const(OneBasedUsize::from_zero_based(1));
+    const ONE_BASED_ONE: OneBasedUsize =
+        OneBasedUsize::from_one_based(1).expect("1 must be a valid one-based usize usize");
+    const ZERO_BASED_ONE: OneBasedUsize =
+        OneBasedUsize::from_zero_based(1).expect("1 must be a valid zero-based usize index");
 
     const ONE_BASED_ONE_AS_ZERO_BASED: usize = ONE_BASED_ONE.as_zero_based();
     const ZERO_BASED_ONE_AS_ONE_BASED: NonZeroUsize = ZERO_BASED_ONE.as_one_based();
@@ -68,47 +63,20 @@ mod from_x_based {
 
     #[test]
     fn zero_fails_on_one_based() {
-        assert_eq!(Err(OneBasedError::ZeroIndex), OneBasedU8::from_one_based(0));
-        assert_eq!(
-            Err(OneBasedError::ZeroIndex),
-            OneBasedU16::from_one_based(0)
-        );
-        assert_eq!(
-            Err(OneBasedError::ZeroIndex),
-            OneBasedU32::from_one_based(0)
-        );
-        assert_eq!(
-            Err(OneBasedError::ZeroIndex),
-            OneBasedU64::from_one_based(0)
-        );
-        assert_eq!(
-            Err(OneBasedError::ZeroIndex),
-            OneBasedU128::from_one_based(0)
-        );
+        assert_eq!(None, OneBasedU8::from_one_based(0));
+        assert_eq!(None, OneBasedU16::from_one_based(0));
+        assert_eq!(None, OneBasedU32::from_one_based(0));
+        assert_eq!(None, OneBasedU64::from_one_based(0));
+        assert_eq!(None, OneBasedU128::from_one_based(0));
     }
 
     #[test]
     fn overflow_fails_on_zero_based() {
-        assert_eq!(
-            Err(OneBasedError::OverflowIndex),
-            OneBasedU8::from_zero_based(u8::MAX)
-        );
-        assert_eq!(
-            Err(OneBasedError::OverflowIndex),
-            OneBasedU16::from_zero_based(u16::MAX)
-        );
-        assert_eq!(
-            Err(OneBasedError::OverflowIndex),
-            OneBasedU32::from_zero_based(u32::MAX)
-        );
-        assert_eq!(
-            Err(OneBasedError::OverflowIndex),
-            OneBasedU64::from_zero_based(u64::MAX)
-        );
-        assert_eq!(
-            Err(OneBasedError::OverflowIndex),
-            OneBasedU128::from_zero_based(u128::MAX)
-        );
+        assert_eq!(None, OneBasedU8::from_zero_based(u8::MAX));
+        assert_eq!(None, OneBasedU16::from_zero_based(u16::MAX));
+        assert_eq!(None, OneBasedU32::from_zero_based(u32::MAX));
+        assert_eq!(None, OneBasedU64::from_zero_based(u64::MAX));
+        assert_eq!(None, OneBasedU128::from_zero_based(u128::MAX));
     }
 }
 

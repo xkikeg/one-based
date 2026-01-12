@@ -2,7 +2,7 @@
 //!
 //! Example:
 //! ```
-//! # use one_based::{OneBasedU32, OneBasedU64, OneBasedError};
+//! # use one_based::{OneBasedU32, OneBasedU64};
 //! # use std::num::NonZeroU64;
 //! // constructs from 1-based.
 //! let v = OneBasedU32::from_one_based(1).unwrap();
@@ -12,17 +12,21 @@
 //! let v = OneBasedU64::from_zero_based(0).unwrap();
 //! assert_eq!(v.as_one_based(), NonZeroU64::new(1).unwrap());
 //!
-//! // fails to construct from zero.
-//! let v: Result<OneBasedU32, OneBasedError> = OneBasedU32::from_one_based(0);
-//! assert_eq!(v.unwrap_err(), OneBasedError::ZeroIndex);
+//! // fails to construct from zero as one-based.
+//! let v: Option<OneBasedU32> = OneBasedU32::from_one_based(0);
+//! assert_eq!(v, None);
+//!
+//! // fails to construct from max as zero-based.
+//! let v: Option<OneBasedU32> = OneBasedU32::from_zero_based(u32::MAX);
+//! assert_eq!(v, None);
 //!
 //! // string format uses 1-based.
 //! let v: OneBasedU32 = "5".parse().unwrap();
 //! assert_eq!(v.as_zero_based(), 4);
-//! assert_eq!(&v.to_string(), "5");
+//! assert_eq!(v.to_string(), "5");
 //! ```
 
-#![cfg_attr(not(feature = "std"), no_std)]
+#![no_std]
 
 use core::{
     fmt::Display,
@@ -49,13 +53,12 @@ macro_rules! define_one_based {
         /// ```
         #[doc = concat!(r" # use one_based::", stringify!($name), r";")]
         #[doc = r" // Creates from 1-based index"]
-        #[doc = concat!(r" let v = ", stringify!($name),r"::from_one_based(5)?;")]
+        #[doc = concat!(r" let v = ", stringify!($name),r"::from_one_based(5).unwrap();")]
         #[doc = r" assert_eq!(v.as_zero_based(), 4);"]
         #[doc = r""]
         #[doc = r" // Creates from 0-based index"]
-        #[doc = concat!(r" let v = ", stringify!($name),r"::from_zero_based(0)?;")]
+        #[doc = concat!(r" let v = ", stringify!($name),r"::from_zero_based(0).unwrap();")]
         #[doc = r" assert_eq!(v.as_one_based().get(), 1);"]
-        #[doc = r" # Ok::<(), one_based::OneBasedError>(())"]
         /// ```
         #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -83,12 +86,19 @@ macro_rules! define_one_based {
 
         impl $name {
             /// Creates `$name` from 1-based index value.
-            /// Returns error if the given index is zero.
+            /// Returns `None` if the given index is zero.
+            ///
+            /// Note you can define a constant given [`Option::unwrap`] is also `const`.
+            /// ```
+            #[doc = concat!(r" # use one_based::", stringify!($name), r";")]
+           #[doc = concat!(r" const ONE_BASED_TEN: ", stringify!($name), r" = ", stringify!($name), r#"::from_one_based(10).expect("10 is non zero");"#)]
+            /// assert_eq!(ONE_BASED_TEN.as_zero_based(), 9);
+            /// ```
             #[inline]
-            pub const fn from_one_based(v: $itype) -> Result<Self, OneBasedError> {
+            pub const fn from_one_based(v: $itype) -> Option<Self> {
                 match <$nonzerotype>::new(v) {
-                    None => return Err(OneBasedError::ZeroIndex),
-                    Some(v) => Ok($name(v)),
+                    None => None,
+                    Some(v) => Some($name(v)),
                 }
             }
 
@@ -110,15 +120,15 @@ macro_rules! define_one_based {
             }
 
             /// Creates `$name` from 0-based index value.
-            /// Returns error if the given index is MAX value,
-            /// as that would case overflow when converted to 1-based.
+            /// Returns `None` if the given index is MAX value,
+            /// as that would cause overflow when converted to 1-based.
             #[inline]
-            pub const fn from_zero_based(v: $itype) -> Result<Self, OneBasedError> {
+            pub const fn from_zero_based(v: $itype) -> Option<Self> {
                 if v == <$nonzerotype>::MAX.get() {
-                    return Err(OneBasedError::OverflowIndex);
+                    return None;
                 }
                 // this won't overflow, and cannot be zero (note all $itype is unsigned).
-                Ok($name(unsafe { <$nonzerotype>::new_unchecked(v + 1) }))
+                Some($name(unsafe { <$nonzerotype>::new_unchecked(v + 1) }))
             }
 
             /// Creates `$name` from 0-based index value without check.
@@ -199,24 +209,3 @@ impl_try_from_one_based!(OneBasedU32 => OneBasedUsize, OneBasedU8, OneBasedU16);
 impl_try_from_one_based!(OneBasedU64 => OneBasedUsize, OneBasedU8, OneBasedU16, OneBasedU32);
 impl_try_from_one_based!(OneBasedU128 => OneBasedUsize, OneBasedU8, OneBasedU16, OneBasedU32, OneBasedU64);
 impl_try_from_one_based!(OneBasedUsize => OneBasedU8, OneBasedU16, OneBasedU32, OneBasedU64, OneBasedU128);
-
-/// Error type used when converting integer to OneBased* types.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum OneBasedError {
-    ZeroIndex,
-    OverflowIndex,
-}
-
-impl Display for OneBasedError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            OneBasedError::ZeroIndex => f.write_str("0 passed as 1-based index"),
-            OneBasedError::OverflowIndex => {
-                f.write_str("unsigned::MAX cannot be used as 0-based index")
-            }
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for OneBasedError {}
