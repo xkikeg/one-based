@@ -85,6 +85,17 @@ macro_rules! define_one_based {
         }
 
         impl $name {
+            /// The size of this non-zero integer type in bits.
+            ///
+            #[doc = concat!(r"This value is equal to ", stringify!($itype), r"::BITS.")]
+            pub const BITS: u32 = <$itype>::BITS;
+
+            /// The smallest value that can be represented by this non-zero integer type, `from_one_based(1)`.
+            pub const MIN: Self = Self::from_one_based_nonzero(<$nonzerotype>::MIN);
+
+            #[doc = concat!(r" The largest value that can be represented by this non-zero integer type, equal to `from_one_based(", stringify!($itype), r"::MAX)`.")]
+            pub const MAX: Self = Self::from_one_based_nonzero(<$nonzerotype>::MAX);
+
             /// Creates `$name` from 1-based index value.
             /// Returns `None` if the given index is zero.
             ///
