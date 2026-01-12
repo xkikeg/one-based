@@ -6,8 +6,9 @@ on:
   pull_request:
     branches:
       - main
-  schedule:
-    - cron: '0 7 * * *'
+# scheduled CI is disabled given the repository inactivity.
+# schedule:
+#   - cron: '0 7 * * *'
 
 jobs:
   cargo-deny:
