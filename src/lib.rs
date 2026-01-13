@@ -87,7 +87,7 @@ macro_rules! define_one_based {
         impl $name {
             /// The size of this non-zero integer type in bits.
             ///
-            #[doc = concat!(r"This value is equal to ", stringify!($itype), r"::BITS.")]
+            #[doc = concat!(r" This value is equal to ", stringify!($itype), r"::BITS.")]
             pub const BITS: u32 = <$itype>::BITS;
 
             /// The smallest value that can be represented by this non-zero integer type, `from_one_based(1)`.
@@ -160,12 +160,12 @@ macro_rules! define_one_based {
             }
 
             /// Returns regular 0-based index.
-            pub const fn as_zero_based(&self) -> $itype {
+            pub const fn as_zero_based(self) -> $itype {
                 self.0.get() - 1
             }
 
             /// Returns 1-based index.
-            pub const fn as_one_based(&self) -> $nonzerotype {
+            pub const fn as_one_based(self) -> $nonzerotype {
                 self.0
             }
         }
