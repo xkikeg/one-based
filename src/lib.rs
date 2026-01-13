@@ -48,7 +48,7 @@ macro_rules! define_one_based {
         /// To describe configuration by humans, often 1-based index is easier than 0-based to understand.
         /// On the other hand, 0-based index is easier to use in the programming.
         /// Also, it's quite hard to track if the index is 0-based or 1-based.
-        /// `$name` provides ergonomics to handle user provided 1-baed index safely.
+        #[doc = concat!(r" `", stringify!($name), r"` provides ergonomics to handle user provided 1-baed index safely.")]
         ///
         /// ```
         #[doc = concat!(r" # use one_based::", stringify!($name), r";")]
@@ -85,21 +85,21 @@ macro_rules! define_one_based {
         }
 
         impl $name {
-            /// The size of this non-zero integer type in bits.
+            /// The size of this one-based integer type in bits.
             ///
             #[doc = concat!(r" This value is equal to ", stringify!($itype), r"::BITS.")]
             pub const BITS: u32 = <$itype>::BITS;
 
-            /// The smallest value that can be represented by this non-zero integer type, `from_one_based(1)`.
+            /// The smallest value that can be represented by this one-based integer type, `from_one_based(1)`.
             pub const MIN: Self = Self::from_one_based_nonzero(<$nonzerotype>::MIN);
 
-            #[doc = concat!(r" The largest value that can be represented by this non-zero integer type, equal to `from_one_based(", stringify!($itype), r"::MAX)`.")]
+            #[doc = concat!(r" The largest value that can be represented by this one-based integer type, equal to `from_one_based(", stringify!($itype), r"::MAX)`.")]
             pub const MAX: Self = Self::from_one_based_nonzero(<$nonzerotype>::MAX);
 
-            /// Creates `$name` from 1-based index value.
+            /// Creates a one-based integer from 1-based index value.
             /// Returns `None` if the given index is zero.
             ///
-            /// Note you can define a constant given [`Option::unwrap`] is also `const`.
+            /// Note you can define a constant easily given [`Option::unwrap()`] or [`Option::expect()`] are also `const`.
             /// ```
             #[doc = concat!(r" # use one_based::", stringify!($name), r";")]
            #[doc = concat!(r" const ONE_BASED_TEN: ", stringify!($name), r" = ", stringify!($name), r#"::from_one_based(10).expect("10 is non zero");"#)]
@@ -113,7 +113,7 @@ macro_rules! define_one_based {
                 }
             }
 
-            /// Creates `$name` from 1-based index value without check.
+            /// Creates a one-based integer from 1-based index value without check.
             ///
             /// # Safety
             ///
@@ -123,14 +123,15 @@ macro_rules! define_one_based {
                 $name(<$nonzerotype>::new_unchecked(v))
             }
 
-            /// Creates `$name` from 1-based index value as [`$nonzerotype`].
-            /// This will always succeed.
+            /// Creates a one-based integer from non-zero 1-based index value.
+            ///
+            /// Given the underlying value is guaranteed to be non-zero, this will always succeed.
             #[inline]
             pub const fn from_one_based_nonzero(v: $nonzerotype) -> Self {
                 Self(v)
             }
 
-            /// Creates `$name` from 0-based index value.
+            /// Creates a one-based integer from 0-based index value.
             /// Returns `None` if the given index is MAX value,
             /// as that would cause overflow when converted to 1-based.
             #[inline]
@@ -142,7 +143,7 @@ macro_rules! define_one_based {
                 Some($name(unsafe { <$nonzerotype>::new_unchecked(v + 1) }))
             }
 
-            /// Creates `$name` from 0-based index value without check.
+            /// Creates a one-based integer from 0-based index value without check.
             ///
             /// # Safety
             #[doc = concat!(r" This function results in undefined behavior when `v == ", stringify!($itype), r"::MAX`.")]
@@ -169,7 +170,7 @@ macro_rules! define_one_based {
                 self.0
             }
 
-            /// Adds an unsigned integer to a non-zero value. Checks for overflow and returns `None` on overflow.
+            /// Adds an unsigned integer to a one-based integer value. Checks for overflow and returns `None` on overflow.
             ///
             #[doc = r" ```"]
             #[doc = concat!(r" # use one_based::", stringify!($name), r";")]
@@ -187,7 +188,7 @@ macro_rules! define_one_based {
                 }
             }
 
-            /// Adds an unsigned integer to a non-zero value. Returns [`Self::MAX`] on overflow.
+            /// Adds an unsigned integer to a one-based integer value. Returns [`Self::MAX`] on overflow.
             ///
             #[doc = r" ```"]
             #[doc = concat!(r" # use one_based::", stringify!($name), r";")]
