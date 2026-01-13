@@ -8,6 +8,12 @@
 
 ### Fixed
 
+## [1.0.0] - 2026-01-13
+
+### Changed
+
+* Major release. Exactly the same as version 0.4.1.
+
 ## [0.4.1] - 2026-01-13
 
 ### Fixed

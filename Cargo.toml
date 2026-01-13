@@ -1,11 +1,11 @@
 [package]
 name = "one-based"
 authors = ["kikeg"]
-version = "0.4.1"
+version = "1.0.0"
 edition = "2018"
 rust-version = "1.83.0"
 license = "Apache-2.0"
-description = "library for 1-based unsigned integers."
+description = "Library providing 1-based unsigned integers."
 keywords = ["no-std", "no_std", "utility"]
 
 [dependencies]
