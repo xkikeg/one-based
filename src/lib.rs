@@ -43,7 +43,7 @@ trait OneBased {
 
 macro_rules! define_one_based {
     ($name:ident, $itype:ty, $nonzerotype:ty) => {
-        #[doc = concat!(r" Represents 1-based index of ", stringify!($itype), r".")]
+        #[doc = concat!(r" Represents 1-based index of [`", stringify!($itype), r"`].")]
         ///
         /// To describe configuration by humans, often 1-based index is easier than 0-based to understand.
         /// On the other hand, 0-based index is easier to use in the programming.
