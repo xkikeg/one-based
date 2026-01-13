@@ -168,6 +168,39 @@ macro_rules! define_one_based {
             pub const fn as_one_based(self) -> $nonzerotype {
                 self.0
             }
+
+            /// Adds an unsigned integer to a non-zero value. Checks for overflow and returns `None` on overflow.
+            ///
+            #[doc = r" ```"]
+            #[doc = concat!(r" # use one_based::", stringify!($name), r";")]
+            #[doc = concat!(r" let one = ", stringify!($name), "::from_zero_based(1).unwrap();")]
+            #[doc = concat!(r" let two = ", stringify!($name), "::from_zero_based(2).unwrap();")]
+            #[doc = concat!(r" let max = ", stringify!($name), "::MAX;")]
+            #[doc = r""]
+            #[doc = r" assert_eq!(Some(two), one.checked_add(1));"]
+            #[doc = r" assert_eq!(None, max.checked_add(1));"]
+            #[doc = r" ```"]
+            pub const fn checked_add(self, other: $itype) -> Option<Self> {
+                match self.0.checked_add(other) {
+                    None => None,
+                    Some(v) => Some(Self(v)),
+                }
+            }
+
+            /// Adds an unsigned integer to a non-zero value. Returns [`Self::MAX`] on overflow.
+            ///
+            #[doc = r" ```"]
+            #[doc = concat!(r" # use one_based::", stringify!($name), r";")]
+            #[doc = concat!(r" let one = ", stringify!($name), "::from_zero_based(1).unwrap();")]
+            #[doc = concat!(r" let two = ", stringify!($name), "::from_zero_based(2).unwrap();")]
+            #[doc = concat!(r" let max = ", stringify!($name), "::MAX;")]
+            #[doc = r""]
+            #[doc = r" assert_eq!(two, one.saturating_add(1));"]
+            #[doc = r" assert_eq!(max, max.saturating_add(1));"]
+            #[doc = r" ```"]
+            pub const fn saturating_add(self, other: $itype) -> Self {
+                Self(self.0.saturating_add(other))
+            }
         }
     };
 }
