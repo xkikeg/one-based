@@ -10,6 +10,16 @@
 
 ### Fixed
 
+## [0.3.1] - 2026-01-13
+
+### Added
+
+* Added associated constants `BITS`, `MIN` and `MAX`.
+
+### Changed
+
+### Fixed
+
 ## [0.3.0] - 2026-01-12
 
 ### Changed
