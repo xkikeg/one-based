@@ -8,6 +8,12 @@
 
 ### Fixed
 
+## [0.4.1] - 2026-01-13
+
+### Fixed
+
+* Corrected document bugs coming from macro expansion.
+
 ## [0.4.0] - 2026-01-13
 
 ### Added
