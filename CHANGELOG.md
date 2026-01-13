@@ -4,11 +4,20 @@
 
 ### Added
 
-* Added associated constants.
-
 ### Changed
 
 ### Fixed
+
+## [0.4.0] - 2026-01-13
+
+### Added
+
+* Added associated constants.
+* Added `checked_add`, `saturating_add` methods.
+
+### Changed
+
+* Use `self` instead of `&self` for `as_*_based` methods.
 
 ## [0.3.1] - 2026-01-13
 
